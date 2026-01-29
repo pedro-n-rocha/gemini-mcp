@@ -177,18 +177,20 @@ Then configure your MCP client:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `CREDENTIALS_PATH` | Path to credentials.json | `./credentials.json` (local) or `/app/config/credentials.json` (Docker) |
+| `CREDENTIALS_PATH` | Directory containing `credentials.json` | `.` (local) or `/app/config` (Docker) |
 | `HOST` | HTTP bind address | `0.0.0.0` |
-| `PORT` | HTTP port | `8080` |
+| `HTTP_PORT` | HTTP port (preferred) | `8080` |
+| `PORT` | HTTP port (legacy alias) | `8080` |
 | `MCP_TRANSPORT` | MCP transport (`sse` or `stdio`) | `sse` |
 
 ### Setting Environment Variables
 
 **Local**:
 ```bash
-export CREDENTIALS_PATH=/path/to/credentials.json
+export CREDENTIALS_PATH=/path/to/dir
 python server.py
 ```
+
 ### Manual Google Cloud Setup
 
 If automatic provisioning fails, you may need to set up the project manually:

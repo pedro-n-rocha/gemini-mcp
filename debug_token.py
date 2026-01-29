@@ -5,7 +5,13 @@ import os
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 
-CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "credentials.json")
+creds_dir = (os.environ.get("CREDENTIALS_PATH") or "").strip()
+if not creds_dir:
+    creds_dir = os.path.dirname(os.path.abspath(__file__))
+creds_dir = os.path.expanduser(creds_dir)
+if creds_dir.lower().endswith(".json"):
+    raise ValueError(f"CREDENTIALS_PATH must be a directory, not a file path: {creds_dir}")
+CREDENTIALS_FILE = os.path.join(creds_dir, "credentials.json")
 
 
 def main():

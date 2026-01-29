@@ -12,7 +12,7 @@ import os
 
 
 def ensure_credentials(credentials_path: str) -> None:
-    if os.path.exists(credentials_path):
+    if os.path.isfile(credentials_path):
         return
 
     print("=" * 60)
@@ -36,7 +36,13 @@ def print_info() -> None:
 
 
 def main() -> None:
-    credentials_path = os.environ.get("CREDENTIALS_PATH", "/app/config/credentials.json")
+    creds_dir = (os.environ.get("CREDENTIALS_PATH") or "").strip()
+    if not creds_dir:
+        creds_dir = os.path.dirname(os.path.abspath(__file__))
+    creds_dir = os.path.expanduser(creds_dir)
+    if creds_dir.lower().endswith(".json"):
+        raise ValueError(f"CREDENTIALS_PATH must be a directory, not a file path: {creds_dir}")
+    credentials_path = os.path.join(creds_dir, "credentials.json")
     ensure_credentials(credentials_path)
     print_info()
 
@@ -44,7 +50,7 @@ def main() -> None:
 
     run_http(
         host=os.environ.get("HOST", "0.0.0.0"),
-        port=int(os.environ.get("PORT", "8080")),
+        port=int(os.environ.get("HTTP_PORT") or os.environ.get("PORT", "8080")),
     )
 
 

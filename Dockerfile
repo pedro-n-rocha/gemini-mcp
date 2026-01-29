@@ -17,7 +17,7 @@ RUN mkdir -p /app/config
 VOLUME /app/config
 
 # Environment variable for credentials path
-ENV CREDENTIALS_PATH=/app/config/credentials.json
+ENV CREDENTIALS_PATH=/app/config
 
 # Entrypoint script
 COPY main.py .

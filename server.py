@@ -16,45 +16,79 @@ ENDPOINT = "https://cloudcode-pa.googleapis.com/v1internal"
 # Initialize MCP server
 mcp = FastMCP("gemini-code-assist")
 
+def _parse_iso_datetime(value: str) -> datetime | None:
+    """Parse an ISO datetime string.
+
+    Accepts trailing "Z" and timezone offsets (e.g. "+00:00"). Returns a
+    datetime or None if parsing fails.
+    """
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _to_utc_naive(dt: datetime) -> datetime:
+    """Normalize datetime to UTC naive (tzinfo=None).
+
+    google-auth uses naive UTC timestamps internally (see google.auth._helpers.utcnow),
+    so passing an offset-aware expiry can crash comparisons.
+    """
+    if dt.tzinfo is None:
+        return dt
+    return dt.astimezone(timezone.utc).replace(tzinfo=None)
+
+
+def _to_utc_aware(dt: datetime) -> datetime:
+    """Normalize datetime to UTC aware (tzinfo=timezone.utc)."""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
 
 def get_credentials_path() -> str:
     """Get the path to credentials.json.
-    
-    Checks for CREDENTIALS_PATH env var first (for Docker),
-    then falls back to local file.
     """
-    return os.environ.get("CREDENTIALS_PATH", os.path.join(os.path.dirname(__file__), "credentials.json"))
+    creds_dir = (os.environ.get("CREDENTIALS_PATH") or "").strip()
+    if not creds_dir:
+        creds_dir = os.path.dirname(os.path.abspath(__file__))
+    creds_dir = os.path.expanduser(creds_dir)
+    if creds_dir.lower().endswith(".json"):
+        raise ValueError(f"CREDENTIALS_PATH must be a directory, not a file path: {creds_dir}")
+    return os.path.join(creds_dir, "credentials.json")
 
 
 def get_session() -> str:
     """Load credentials, refresh if needed, and return the access token."""
     creds_path = get_credentials_path()
 
-    if not os.path.exists(creds_path):
+    if not os.path.isfile(creds_path):
         raise FileNotFoundError(
-            "credentials.json not found. Please run manual_auth.py first to authenticate."
+            f"credentials.json not found at {creds_path}. Please run manual_auth.py first to authenticate."
         )
 
     with open(creds_path, "r") as f:
         creds_data = json.load(f)
 
-    expiry = None
+    expiry: datetime | None = None
     expiry_raw = creds_data.get("expiry")
     if isinstance(expiry_raw, str) and expiry_raw:
-        try:
-            expiry = datetime.fromisoformat(expiry_raw.replace("Z", "+00:00"))
-        except ValueError:
-            expiry = None
+        parsed = _parse_iso_datetime(expiry_raw)
+        if parsed is not None:
+            expiry = _to_utc_naive(parsed)
     else:
         obtained_at_raw = creds_data.get("obtained_at")
         expires_in_raw = creds_data.get("expires_in")
         if isinstance(obtained_at_raw, str) and obtained_at_raw and expires_in_raw is not None:
             try:
-                obtained_at = datetime.fromisoformat(obtained_at_raw.replace("Z", "+00:00"))
-                if obtained_at.tzinfo is None:
-                    obtained_at = obtained_at.replace(tzinfo=timezone.utc)
+                obtained_at = _parse_iso_datetime(obtained_at_raw)
+                if obtained_at is None:
+                    raise ValueError("Invalid obtained_at")
+                obtained_at_aware = _to_utc_aware(obtained_at)
                 expires_in = float(expires_in_raw)
-                expiry = obtained_at + timedelta(seconds=expires_in)
+                expiry = _to_utc_naive(obtained_at_aware + timedelta(seconds=expires_in))
             except (ValueError, TypeError):
                 expiry = None
 
@@ -81,7 +115,7 @@ def get_session() -> str:
         if creds.expiry is not None:
             now = datetime.now(timezone.utc)
             creds_data["obtained_at"] = now.isoformat()
-            creds_data["expiry"] = creds.expiry.astimezone(timezone.utc).isoformat()
+            creds_data["expiry"] = _to_utc_aware(creds.expiry).isoformat()
         with open(creds_path, "w") as f:
             json.dump(creds_data, f, indent=2)
 
@@ -331,5 +365,5 @@ if __name__ == "__main__":
     else:
         run_http(
             host=os.environ.get("HOST", "0.0.0.0"),
-            port=int(os.environ.get("PORT", "8080")),
+            port=int(os.environ.get("HTTP_PORT") or os.environ.get("PORT", "8080")),
         )

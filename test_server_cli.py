@@ -3,5 +3,10 @@
 
 from server import gemini_search
 
-result = gemini_search("Hello, are you working?", model="gemini-2.5-flash")
-print(result)
+def main() -> None:
+    result = gemini_search("Hello, are you working?", model="gemini-2.5-flash")
+    print(result)
+
+
+if __name__ == "__main__":
+    main()

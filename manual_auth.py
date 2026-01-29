@@ -85,8 +85,13 @@ def exchange_code_for_tokens(code: str, code_verifier: str) -> dict:
 
 def save_credentials(tokens: dict):
     """Save tokens to credentials file."""
-    # Use CREDENTIALS_PATH env var if set, otherwise fall back to script directory
-    filepath = os.environ.get("CREDENTIALS_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "credentials.json"))
+    creds_dir = (os.environ.get("CREDENTIALS_PATH") or "").strip()
+    if not creds_dir:
+        creds_dir = os.path.dirname(os.path.abspath(__file__))
+    creds_dir = os.path.expanduser(creds_dir)
+    if creds_dir.lower().endswith(".json"):
+        raise ValueError(f"CREDENTIALS_PATH must be a directory, not a file path: {creds_dir}")
+    filepath = os.path.join(creds_dir, "credentials.json")
     client_id, client_secret = require_oauth_app_credentials()
 
     obtained_at = datetime.now(timezone.utc)
@@ -107,6 +112,10 @@ def save_credentials(tokens: dict):
         "client_secret": client_secret,
     }
     
+    parent_dir = os.path.dirname(filepath)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
+
     with open(filepath, "w") as f:
         json.dump(credentials, f, indent=2)
     

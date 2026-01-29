@@ -57,9 +57,12 @@ export GOOGLE_OAUTH_CLIENT_SECRET="..."
 python manual_auth.py
 ```
 
-Or put them in a `.env` file (see `.env.example`) and run:
+Or put them in a `.env` file (see `.env.example`) and load it into your shell first:
 
 ```bash
+set -a
+source .env
+set +a
 python manual_auth.py
 ```
 

@@ -11,7 +11,6 @@ COPY server.py .
 COPY search.py .
 COPY info.py .
 COPY manual_auth.py .
-COPY envfile.py .
 
 # Config directory for credentials (to be bind mounted)
 RUN mkdir -p /app/config

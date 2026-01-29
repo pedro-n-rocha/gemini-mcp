@@ -10,8 +10,6 @@ from __future__ import annotations
 
 import os
 
-from envfile import load_env_file
-
 
 def ensure_credentials(credentials_path: str) -> None:
     if os.path.exists(credentials_path):
@@ -38,7 +36,6 @@ def print_info() -> None:
 
 
 def main() -> None:
-    load_env_file()
     credentials_path = os.environ.get("CREDENTIALS_PATH", "/app/config/credentials.json")
     ensure_credentials(credentials_path)
     print_info()

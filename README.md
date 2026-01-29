@@ -14,9 +14,8 @@ An MCP (Model Context Protocol) server that provides Google Search grounding cap
 
 - Python 3.11+
 - A Google account with access to Gemini Code Assist
-- A Google OAuth client (set `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET`)
-- For local development: `pip` and `venv`
-- For Docker: Docker
+- A Google OAuth client (set `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET`) it is out there somewhere , search for it 
+
 
 ## Installation
 
@@ -57,25 +56,10 @@ export GOOGLE_OAUTH_CLIENT_SECRET="..."
 python manual_auth.py
 ```
 
-Or put them in a `.env` file (see `.env.example`) and load it into your shell first:
-
-```bash
-set -a
-source .env
-set +a
-python manual_auth.py
-```
-
 ### Docker Authentication
 
 ```bash
 docker run -it --rm -e GOOGLE_OAUTH_CLIENT_ID="..." -e GOOGLE_OAUTH_CLIENT_SECRET="..." -p 8080:8080 -v ./config:/app/config gemini-mcp
-```
-
-You can also pass these via an env file:
-
-```bash
-docker run -it --rm --env-file .env -p 8080:8080 -v ./config:/app/config gemini-mcp
 ```
 
 On first run (when no credentials exist), the container will:
@@ -171,43 +155,6 @@ The following Gemini models are supported:
 
 ## MCP Client Configuration
 
-### Claude Desktop (stdio mode)
-
-Add the following to your Claude Desktop configuration file:
-
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-
-#### Local Python
-
-```json
-{
-  "mcpServers": {
-    "gemini-search": {
-      "command": "python",
-      "args": ["/absolute/path/to/gemini_cli_mcp/server.py"],
-      "env": {"MCP_TRANSPORT": "stdio"}
-    }
-  }
-}
-```
-
-#### With Virtual Environment
-
-```json
-{
-  "mcpServers": {
-    "gemini-search": {
-      "command": "/absolute/path/to/gemini_cli_mcp/venv/bin/python",
-      "args": ["/absolute/path/to/gemini_cli_mcp/server.py"],
-      "env": {"MCP_TRANSPORT": "stdio"}
-    }
-  }
-}
-```
-
-### Claude Code / HTTP Mode
-
 For clients that support HTTP/SSE transport, run the server in HTTP mode:
 
 ```bash
@@ -242,32 +189,6 @@ Then configure your MCP client:
 export CREDENTIALS_PATH=/path/to/credentials.json
 python server.py
 ```
-
-## Troubleshooting
-
-### "credentials.json not found" / "NO CREDENTIALS FOUND"
-
-**Cause**: You haven't authenticated yet.
-
-**Solution**: 
-- Local: Run `python manual_auth.py`
-- Docker: Run `docker run -it --rm -p 8080:8080 -v ./config:/app/config gemini-mcp` (it will prompt for auth)
-
-### "Token has been expired or revoked"
-
-**Cause**: Your OAuth token has expired and couldn't be refreshed.
-
-**Solution**: Re-authenticate using the methods above.
-
-### "HTTP Error 403: Forbidden"
-
-**Cause**: Your Google account may not have access to Gemini Code Assist.
-
-**Solution**: 
-1. Ensure you have access to Gemini Code Assist
-2. Try re-authenticating
-3. Check that the correct Google account was used
-
 ### Manual Google Cloud Setup
 
 If automatic provisioning fails, you may need to set up the project manually:
@@ -280,57 +201,3 @@ If automatic provisioning fails, you may need to set up the project manually:
 ### Gemini Admin Settings
 
 In Google Cloud Console, search for **Admin for Gemini**. Open it, go to **Settings**, then enable **Preview** on release channels for **Gemini Code Assist in local IDEs**.
-
-### Docker: "Cannot connect to the Docker daemon"
-
-**Cause**: Docker is not running.
-
-**Solution**: Start Docker Desktop or the Docker service.
-
-### MCP: Server not connecting
-
-**Cause**: Path issues or Python environment problems.
-
-**Solution**:
-1. Verify all paths in the config are absolute paths
-2. Ensure Python has access to the required packages
-3. Check client logs for detailed error messages
-4. Try running `python server.py` manually to test
-
-### Permission denied on credentials.json
-
-**Cause**: File permissions issue, especially with Docker volumes.
-
-**Solution**:
-```bash
-chmod 644 config/credentials.json
-```
-
-## Project Structure
-
-```
-gemini_cli_mcp/
-├── server.py          # Main MCP server
-├── search.py          # CLI search tool
-├── info.py            # Credential info display
-├── manual_auth.py     # OAuth authentication
-├── main.py            # Docker container main
-├── requirements.txt   # Python dependencies
-├── Dockerfile         # Docker image definition
-├── .dockerignore      # Docker build exclusions
-├── config/            # Config directory (for Docker volume mount)
-│   └── .gitkeep
-├── credentials.json   # OAuth credentials (gitignored, local use)
-└── README.md          # This file
-```
-
-## Security Notes
-
-- **Never commit `credentials.json`** to version control
-- The `.dockerignore` file excludes sensitive files from Docker builds
-- Credentials contain OAuth tokens that grant access to your Google account
-- Consider using environment variables or secrets management in production
-
-## License
-
-MIT License

@@ -258,6 +258,19 @@ python server.py
 2. Try re-authenticating
 3. Check that the correct Google account was used
 
+### Manual Google Cloud Setup
+
+If automatic provisioning fails, you may need to set up the project manually:
+
+1. Go to the Google Cloud Console.
+2. Create or select a project.
+3. Enable the Gemini for Google Cloud API (`cloudaicompanion.googleapis.com`).
+4. Configure the `projectId` in your Opencode config as shown above.
+
+### Gemini Admin Settings
+
+In the Google Admin console for Gemini settings, enable **Preview** on release channels for **Gemini Code Assist in local IDEs**.
+
 ### Docker: "Cannot connect to the Docker daemon"
 
 **Cause**: Docker is not running.

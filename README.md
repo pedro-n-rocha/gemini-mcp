@@ -51,8 +51,15 @@ Before using any scripts, you need to authenticate with Google.
 ### Local Authentication
 
 ```bash
+# Option A: export env vars
 export GOOGLE_OAUTH_CLIENT_ID="...apps.googleusercontent.com"
 export GOOGLE_OAUTH_CLIENT_SECRET="..."
+python manual_auth.py
+```
+
+Or put them in a `.env` file (see `.env.example`) and run:
+
+```bash
 python manual_auth.py
 ```
 

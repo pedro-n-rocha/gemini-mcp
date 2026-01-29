@@ -30,3 +30,4 @@ credentials.json
 config/credentials.json
 credentials*.json
 config/credentials*.json
+.env

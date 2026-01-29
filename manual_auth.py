@@ -9,10 +9,13 @@ import json
 import urllib.parse
 from datetime import datetime, timedelta, timezone
 
+from dotenv import load_dotenv
+
 # OAuth app credentials (do not hardcode these in the repo).
 # Provide them via environment variables:
 #   - GOOGLE_OAUTH_CLIENT_ID
 #   - GOOGLE_OAUTH_CLIENT_SECRET
+load_dotenv()
 CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
 REDIRECT_URI = "http://localhost:8085/oauth2callback"

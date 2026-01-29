@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import os
 
+from dotenv import load_dotenv
+
 
 def ensure_credentials(credentials_path: str) -> None:
     if os.path.exists(credentials_path):
@@ -36,6 +38,7 @@ def print_info() -> None:
 
 
 def main() -> None:
+    load_dotenv()
     credentials_path = os.environ.get("CREDENTIALS_PATH", "/app/config/credentials.json")
     ensure_credentials(credentials_path)
     print_info()
@@ -50,4 +53,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -269,7 +269,7 @@ If automatic provisioning fails, you may need to set up the project manually:
 
 ### Gemini Admin Settings
 
-In the Google Admin console for Gemini settings, enable **Preview** on release channels for **Gemini Code Assist in local IDEs**.
+In Google Cloud Console, search for **Admin for Gemini**, then enable **Preview** on release channels for **Gemini Code Assist in local IDEs**.
 
 ### Docker: "Cannot connect to the Docker daemon"
 

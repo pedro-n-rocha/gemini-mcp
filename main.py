@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import os
 
-from dotenv import load_dotenv
+from envfile import load_env_file
 
 
 def ensure_credentials(credentials_path: str) -> None:
@@ -38,7 +38,7 @@ def print_info() -> None:
 
 
 def main() -> None:
-    load_dotenv()
+    load_env_file()
     credentials_path = os.environ.get("CREDENTIALS_PATH", "/app/config/credentials.json")
     ensure_credentials(credentials_path)
     print_info()
